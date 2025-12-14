@@ -263,14 +263,14 @@ export default function NewCampaign() {
                         <Globe className="w-4 h-4 text-zinc-400" strokeWidth={1.5} />
                         Domínio Personalizado
                       </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <Select onValueChange={(val) => field.onChange(val === "default" ? undefined : val)} value={field.value || "default"}>
                         <FormControl>
                           <SelectTrigger data-testid="select-domain">
                             <SelectValue placeholder="Usar domínio padrão do LinkShield" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Usar domínio padrão</SelectItem>
+                          <SelectItem value="default">Usar domínio padrão</SelectItem>
                           {domains.filter(d => d.dnsVerified).map((domain) => (
                             <SelectItem key={domain.id} value={domain.id}>
                               {domain.entryDomain}
