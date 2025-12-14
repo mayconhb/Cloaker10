@@ -1,0 +1,87 @@
+# ATENÇÃO: INSTRUÇÕES DE UI/UX E DESIGN SYSTEM (LinkShield)
+
+Atue como um **Lead Product Designer** e **Engenheiro Frontend Sênior**. O código funcional é importante, mas a **EXCELÊNCIA VISUAL** é a prioridade máxima nesta etapa.
+
+Eu NÃO quero um visual "padrão Bootstrap" ou "HTML cru".
+Eu quero um visual **Premium SaaS**, Dark Mode, minimalista e sofisticado, similar aos painéis da Vercel, Linear ou Supabase.
+
+## 1. DESIGN SYSTEM & FUNDAÇÃO (Obrigatório)
+
+- **Biblioteca de Componentes:** Você DEVE instalar e usar **Shadcn/UI** para TUDO (Buttons, Inputs, Cards, Dialogs, Sheets, Switches, Badges, Tables).
+- **CSS Framework:** Tailwind CSS.
+- **Paleta de Cores:**
+  - **Background:** `zinc-950` (#09090b) - Quase preto, não preto puro.
+  - **Surface/Cards:** `zinc-900` com bordas sutis em `zinc-800`.
+  - **Primary (Acento):** Branco puro (`#ffffff`) para texto e botões principais (Invertido).
+  - **Secondary:** `zinc-800` para botões secundários.
+  - **Semantic Colors:**
+    - `emerald-500`: Para Status "Allowed" / "Ativo".
+    - `rose-500`: Para Status "Blocked" / "Erro".
+    - `amber-500`: Para Alertas.
+- **Tipografia:** Fonte `Inter` ou `Geist Sans` (via `next/font`). Use espaçamento de letras (tracking-tight) em títulos.
+- **Ícones:** Use `lucide-react`. Escolha ícones com traços finos (stroke-width 1.5 ou 2).
+
+## 2. LAYOUT GLOBAL (Shell)
+
+- Crie um **Header (Navbar)** fixo no topo com efeito "Glassmorphism" (backdrop-filter: blur).
+  - Logo: Texto simples "LinkShield" em negrito, tracking-tighter.
+  - Navegação: Links sutis (Dashboard, Analytics). Estado ativo deve ter cor branca, inativo cinza.
+  - User Menu: Avatar simples à direita.
+- **Espaçamento:** Use containers centralizados (`max-w-6xl mx-auto`) com padding generoso (`p-6` ou `p-8`). Nada deve parecer "espremido".
+
+## 3. PÁGINA: DASHBOARD (`/admin`)
+
+Não use tabelas feias padrão. Use o componente `Table` do Shadcn dentro de um `Card`.
+- **KPI Cards (Topo):** 3 Cards lado a lado (Total Campanhas, Cliques Hoje, Bloqueios Hoje). Use ícones grandes e opacos no fundo do card para decoração.
+- **Tabela de Campanhas:**
+  - Cabeçalho da tabela com texto cinza claro (`text-zinc-400`).
+  - Linhas com hover sutil (`hover:bg-zinc-800/50`).
+  - Coluna "Status": Use um `Badge` pequeno (verde ou cinza).
+  - Coluna "Slug": Fonte mono-espaçada, cor cinza, com um botão ícone pequeno para "Copiar Link".
+  - Botão de Ação: "Nova Campanha" deve ser o destaque visual da página (Botão Branco).
+
+## 4. PÁGINA: CRIAR CAMPANHA (`/admin/new`) - A Mais Importante
+
+Esta página deve parecer um "Setup Wizard" profissional. NÃO coloque um formulário gigante vertical. Organize em **Cards Lógicos** com títulos claros e descrições auxiliares (`text-sm text-muted-foreground`).
+
+- **Card 1: Identidade**
+  - Inputs grandes para Nome e Slug.
+  - Input para Safe URL.
+
+- **Card 2: Engenharia de Tráfego (Split Test)**
+  - Crie uma interface visual para os destinos.
+  - Use um botão "+ Adicionar Oferta".
+  - Cada oferta deve ser uma linha com: Input de ID (pequeno), Input de URL (grande), Slider ou Input numérico para Peso.
+  - Use ícones de "Lixeira" para remover uma oferta.
+
+- **Card 3: O "Escudo" (Segurança)**
+  - Aqui está o "Ouro" da UX. Não use apenas checkboxes. Use **Switches (Toggles)** alinhados à direita.
+  - Layout de cada item:
+    [ Ícone Desktop ] **Bloquear Desktop** [ Switch ]
+    *Texto pequeno explicando: "Impede acesso via PC."*
+    -------------------------------------------------------
+    [ Ícone Globo ]   **Bloqueio Geográfico** [ Select Multi ]
+    *Texto pequeno: "Permite apenas Brasil."*
+    -------------------------------------------------------
+    [ Ícone Cadeado ] **Trava de Origem** [ Switch ]
+    *Texto pequeno: "Exige fbclid ou App Browser."*
+
+## 5. PÁGINA: ANALYTICS (`/admin/[id]`)
+
+Use a biblioteca `recharts`.
+- **Visual dos Gráficos:**
+  - Remova as "grids" de fundo dos gráficos (deixe limpo).
+  - Use Tooltips customizados (fundo escuro, borda fina).
+  - Cores das linhas: `emerald-500` (Allowed) vs `rose-500` (Blocked).
+  - Gráfico de Pizza (Donut): Deve ter um buraco no meio. Legenda limpa ao lado.
+
+## 6. MICRO-INTERAÇÕES (O Toque Final)
+
+- **Loading States:** Quando clicar em "Salvar", o botão deve mostrar um "Spinner" e ficar desabilitado.
+- **Toasts:** Use o componente `Sonner` ou `Toast` do Shadcn. Quando salvar, exiba: "Campanha criada com sucesso" (borda verde). Se der erro: "Falha ao salvar" (borda vermelha).
+- **Transições:** Adicione `transition-all duration-200` em botões e inputs para suavizar o hover.
+
+---
+
+**Comando Final:**
+Implemente essas diretrizes visuais AGORA. Refatore o frontend existente para usar estritamente Shadcn/UI e Tailwind com essas escolhas estéticas. Quero que o resultado pareça um produto profissional pronto para venda.
