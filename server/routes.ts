@@ -370,7 +370,7 @@ export async function registerRoutes(
       const deviceBlock = shouldBlockDevice(deviceDetection, campaign.blockDesktop ?? false);
       const shouldBlockByDevice = deviceBlock.shouldBlock;
 
-      const geoResult = await detectCountryFromIP(ipAddress);
+      const geoResult = await detectCountryFromIP(ipAddress, req.headers as Record<string, string | string[] | undefined>);
       const geoBlock = shouldBlockByCountry(geoResult.country, campaign.blockedCountries);
       const shouldBlockByGeo = geoBlock.shouldBlock;
 

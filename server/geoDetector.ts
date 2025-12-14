@@ -43,7 +43,34 @@ export function getCountryName(code: string): string {
   return COUNTRY_NAMES[code.toUpperCase()] || code.toUpperCase();
 }
 
-export async function detectCountryFromIP(ip: string): Promise<GeoResult> {
+export function detectCountryFromHeaders(headers: Record<string, string | string[] | undefined>): GeoResult | null {
+  const vercelCountry = headers["x-vercel-ip-country"];
+  if (vercelCountry && typeof vercelCountry === "string") {
+    return {
+      country: vercelCountry.toUpperCase(),
+      countryName: getCountryName(vercelCountry),
+    };
+  }
+
+  const cfCountry = headers["cf-ipcountry"];
+  if (cfCountry && typeof cfCountry === "string") {
+    return {
+      country: cfCountry.toUpperCase(),
+      countryName: getCountryName(cfCountry),
+    };
+  }
+
+  return null;
+}
+
+export async function detectCountryFromIP(ip: string, headers?: Record<string, string | string[] | undefined>): Promise<GeoResult> {
+  if (headers) {
+    const headerResult = detectCountryFromHeaders(headers);
+    if (headerResult) {
+      return headerResult;
+    }
+  }
+
   if (!ip || ip === "127.0.0.1" || ip === "::1" || ip.startsWith("192.168.") || ip.startsWith("10.")) {
     return { country: null, countryName: null };
   }
