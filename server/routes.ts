@@ -5,6 +5,7 @@ import { isAuthenticated, setupAuth } from "./simpleAuth";
 import { detectBot, getClientIP } from "./botDetector";
 import { detectDevice, shouldBlockDevice } from "./deviceDetector";
 import { detectCountryFromIP, shouldBlockByCountry, AVAILABLE_COUNTRIES } from "./geoDetector";
+import { detectOriginLock, shouldBlockByOrigin } from "./originLock";
 import { insertCampaignSchema, insertDomainSchema } from "@shared/schema";
 import { verifyDomainDns, getDnsInstructions } from "./dnsVerifier";
 
@@ -374,7 +375,13 @@ export async function registerRoutes(
       const geoBlock = shouldBlockByCountry(geoResult.country, campaign.blockedCountries);
       const shouldBlockByGeo = geoBlock.shouldBlock;
 
-      const shouldBlock = shouldBlockBot || shouldBlockByDevice || shouldBlockByGeo;
+      // Camada 4: Origin Lock (Trava de Origem Híbrida)
+      const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+      const originResult = detectOriginLock(fullUrl, userAgent);
+      const originBlock = shouldBlockByOrigin(originResult, campaign.enableOriginLock ?? false);
+      const shouldBlockByOriginLock = originBlock.shouldBlock;
+
+      const shouldBlock = shouldBlockBot || shouldBlockByDevice || shouldBlockByGeo || shouldBlockByOriginLock;
       let blockReason: string | null = null;
       
       if (shouldBlockBot) {
@@ -383,6 +390,8 @@ export async function registerRoutes(
         blockReason = `Camada 2 (Dispositivo): ${deviceBlock.reason}`;
       } else if (shouldBlockByGeo) {
         blockReason = `Camada 3 (Geo): ${geoBlock.reason}`;
+      } else if (shouldBlockByOriginLock) {
+        blockReason = `Camada 4 (Origin Lock): ${originBlock.reason}`;
       }
 
       await storage.createAccessLog({
