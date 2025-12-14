@@ -11,8 +11,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 export default function Login() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@123.com");
+  const [password, setPassword] = useState("admin123");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
