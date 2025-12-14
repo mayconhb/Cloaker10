@@ -45,6 +45,7 @@ export const campaigns = pgTable("campaigns", {
   safePageUrl: text("safe_page_url").notNull(),
   isActive: boolean("is_active").default(true),
   blockBots: boolean("block_bots").default(true),
+  blockDesktop: boolean("block_desktop").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -57,9 +58,11 @@ export const accessLogs = pgTable("access_logs", {
   ipAddress: varchar("ip_address", { length: 45 }),
   country: varchar("country", { length: 2 }),
   referer: text("referer"),
+  deviceType: varchar("device_type", { length: 20 }),
   isBot: boolean("is_bot").default(false),
   botReason: varchar("bot_reason", { length: 255 }),
   wasBlocked: boolean("was_blocked").default(false),
+  blockReason: varchar("block_reason", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("IDX_access_logs_campaign").on(table.campaignId),

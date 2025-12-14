@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { isAuthenticated, setupAuth } from "./replitAuth";
 import { detectBot, getClientIP } from "./botDetector";
+import { detectDevice, shouldBlockDevice } from "./deviceDetector";
 import { insertCampaignSchema } from "@shared/schema";
 
 export async function registerRoutes(
@@ -181,17 +182,35 @@ export async function registerRoutes(
       const ipAddress = getClientIP(req);
       const referer = req.headers["referer"] || null;
 
-      const detection = detectBot(userAgent);
-      const shouldBlock = campaign.blockBots && detection.isBot;
+      // Camada 1: Detecção de Bots
+      const botDetection = detectBot(userAgent);
+      const shouldBlockBot = campaign.blockBots && botDetection.isBot;
+
+      // Camada 2: Detecção de Dispositivo
+      const deviceDetection = detectDevice(userAgent);
+      const deviceBlock = shouldBlockDevice(deviceDetection, campaign.blockDesktop ?? false);
+      const shouldBlockByDevice = deviceBlock.shouldBlock;
+
+      // Determinar se deve bloquear e o motivo
+      const shouldBlock = shouldBlockBot || shouldBlockByDevice;
+      let blockReason: string | null = null;
+      
+      if (shouldBlockBot) {
+        blockReason = `Camada 1 (Bot): ${botDetection.reason}`;
+      } else if (shouldBlockByDevice) {
+        blockReason = `Camada 2 (Dispositivo): ${deviceBlock.reason}`;
+      }
 
       await storage.createAccessLog({
         campaignId: campaign.id,
         userAgent,
         ipAddress,
         referer,
-        isBot: detection.isBot,
-        botReason: detection.reason,
+        deviceType: deviceDetection.deviceType,
+        isBot: botDetection.isBot,
+        botReason: botDetection.reason,
         wasBlocked: shouldBlock,
+        blockReason,
       });
 
       if (shouldBlock) {

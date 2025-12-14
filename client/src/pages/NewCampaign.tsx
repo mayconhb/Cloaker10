@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Shield, Bot, Loader2 } from "lucide-react";
+import { ArrowLeft, Shield, Bot, Loader2, Monitor } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +33,7 @@ const campaignFormSchema = z.object({
   destinationUrl: z.string().url("URL de destino inválida"),
   safePageUrl: z.string().url("URL da Safe Page inválida"),
   blockBots: z.boolean().default(true),
+  blockDesktop: z.boolean().default(false),
 });
 
 type CampaignFormValues = z.infer<typeof campaignFormSchema>;
@@ -63,6 +64,7 @@ export default function NewCampaign() {
       destinationUrl: "",
       safePageUrl: "",
       blockBots: true,
+      blockDesktop: false,
     },
   });
 
@@ -276,16 +278,32 @@ export default function NewCampaign() {
                   )}
                 />
 
-                <div className="flex items-center justify-between gap-4 rounded-lg border border-zinc-800/50 p-4 opacity-50">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-zinc-500 font-medium text-sm">Camada 2: Filtro de Dispositivo</span>
-                      <span className="text-xs text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">Em breve</span>
-                    </div>
-                    <p className="text-xs text-zinc-600">Bloqueia acessos via Desktop</p>
-                  </div>
-                  <Switch disabled />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="blockDesktop"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between gap-4 rounded-lg border border-zinc-800 p-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Monitor className="w-4 h-4 text-zinc-400" strokeWidth={1.5} />
+                          <FormLabel className="text-white font-medium cursor-pointer">
+                            Camada 2: Filtro de Dispositivo
+                          </FormLabel>
+                        </div>
+                        <FormDescription className="text-xs">
+                          Bloqueia acessos via Desktop/PC. A maioria dos espiões e clonadores trabalha sentado na frente de um computador.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          data-testid="switch-block-desktop"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
                 <div className="flex items-center justify-between gap-4 rounded-lg border border-zinc-800/50 p-4 opacity-50">
                   <div className="space-y-1">
