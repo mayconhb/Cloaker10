@@ -61,6 +61,7 @@ export const campaigns = pgTable("campaigns", {
   isActive: boolean("is_active").default(true),
   blockBots: boolean("block_bots").default(true),
   blockDesktop: boolean("block_desktop").default(false),
+  blockedCountries: text("blocked_countries").array().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

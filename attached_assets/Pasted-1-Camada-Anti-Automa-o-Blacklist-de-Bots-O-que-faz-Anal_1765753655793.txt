@@ -1,0 +1,103 @@
+1 - Camada Anti-Automação (Blacklist de Bots)
+O que faz: Analisa o "User-Agent" em busca de assinaturas de ferramentas de clonagem e scripts de programação.
+
+Alvos: headless chrome, puppeteer, selenium, python, curl, wget, ahrefs, semrush.
+
+Ação: Bloqueia e envia para a Safe Page.
+
+Por que: Impede que concorrentes usem softwares para baixar/copiar sua página de vendas automaticamente.
+
+
+
+
+
+2 - Camada de Filtro de Dispositivo (Device Check)
+O que faz: Verifica se o acesso está vindo de um Computador (Desktop) ou Celular (Mobile).
+
+Configuração: Escolher dispositivos para bloquear no painel de criação de campanha
+
+Ação: Se for Desktop e a regra estiver ativa, bloqueia.
+
+Por que: A maioria dos espiões e clonadores manuais trabalha sentado na frente de um computador.
+
+
+
+
+3 - Camada de Geolocalização (Geo Block)
+O que faz: Verifica o país de origem do IP do visitante.
+
+Configuração: Escolher países para bloquear no painel de criação de campanha
+
+Ação: Se o IP for de um país bloqueado, envia para a Safe Page.
+
+Por que: Filtra bots globais e curiosos que não são do seu mercado-alvo
+
+
+
+
+4 - Camada de Trava de Origem Híbrida (Origin Lock)
+O que faz: Verifica se o clique tem "rastros" de ser legítimo de um anúncio.
+
+Regra: Exige que a URL tenha o parâmetro fbclid OU que o navegador seja o interno do app (Instagram, Facebook App, Messenger).
+
+Ação: Se alguém copiar o link limpo e colar no Chrome, é bloqueado.
+
+Por que: É a proteção mais forte contra espionagem manual (Biblioteca de Anúncios) e tráfego orgânico "sujo", sem perder vendas de iOS (que removem parâmetros).
+
+
+
+Detalhamento da camada 4:
+
+Camada 4: Trava de Origem Híbrida (Origin Lock)
+
+O Objetivo: Garantir que o visitante realmente clicou em um anúncio e não está tentando acessar seu site diretamente (copiando e colando o link) ou usando ferramentas de espionagem.
+
+Esta camada funciona como um segurança na porta de uma festa que exige um convite carimbado ou um crachá de funcionário para deixar entrar.
+
+1. Como ela funciona (A Lógica do "OU")
+Diferente de travas antigas que exigiam uma senha fixa (tipo ?k=venda), esta trava é dinâmica. Ela analisa duas características da visita e libera se pelo menos uma for verdadeira:
+
+Verificação A (O Convite): O parâmetro fbclidQuando qualquer pessoa clica em um anúncio no Facebook ou Instagram, a plataforma adiciona automaticamente um código único ao final do link, chamado fbclid (Facebook Click ID).
+
+O Teste: O sistema olha para a URL. Tem fbclid=?Se SIM: É um clique legítimo de anúncio. LIBERA.
+
+Verificação B (O Crachá): O Navegador Interno (In-App Browser)Quando você clica num link dentro do Instagram, ele não abre o Google Chrome ou Safari externamente. Ele abre um navegadorzinho dentro do próprio Instagram.Esse navegador interno se identifica (via User-Agent) com nomes específicos como Instagram, FBAN (Facebook Android) ou FBAV.
+
+O Teste: O sistema olha para o User-Agent. É um navegador interno do Facebook/Instagram?Se SIM: O usuário está dentro do app. LIBERA.
+
+A Regra Final:Se não tiver fbclid E não estiver no navegador interno → BLOQUEIA (Envia para Safe Page).
+
+2. Por que essa "Hibridez" é necessária? (O Problema do iOS 17)
+
+Você pode perguntar: "Por que não exigir apenas o fbclid?"
+
+A resposta é a Apple. Nas atualizações recentes do iPhone (iOS 17+), a Apple introduziu uma função de privacidade que remove automaticamente parâmetros de rastreamento das URLs quando o usuário navega no modo privado ou em certos contextos.
+
+Cenário sem a Verificação B: Um cliente real com iPhone clica no seu anúncio. A Apple remove o fbclid antes de chegar no seu site. Seu cloaker não vê o código e bloqueia uma venda real.
+
+Cenário COM a Verificação B: O cloaker vê que não tem fbclid, MAS percebe que o acesso está vindo de dentro do app do Instagram (InAppBrowser). Ele entende que é um usuário legítimo de iPhone e libera a venda.
+
+3. O Duelo: Por que NÃO usar o Referer?
+
+O Referer é um cabeçalho que o navegador envia dizendo "eu vim do site X". Antigamente, usava-se muito isso (if referer contains 'facebook' -> libera). Hoje, isso é uma prática ruim e perigosa por três motivos:
+
+O Problema do Referer (Método Antigo)
+Confiabilidade
+Baixa. Muitos aplicativos e antivírus removem o Referer por privacidade. Você bloqueia cerca de 20% do tráfego real.
+
+Segurança
+Baixa. É trivial falsificar. Qualquer bot de 5ª categoria pode enviar um cabeçalho dizendo Referer: facebook.com.
+
+Ambiente Mobile
+"Péssima. Ao transitar de um App (HTTPS) para um Site (HTTPS), o cabeçalho Referer frequentemente é perdido."
+
+
+A Vantagem da Trava Híbrida (Nosso Método)
+Confiabilidade
+"Alta. O App do Facebook não consegue ""esconder"" que é ele mesmo (User-Agent), e o fbclid é injetado pelo próprio anúncio."
+
+Segurança
+Média/Alta. Falsificar um fbclid válido ou simular perfeitamente o ambiente de um navegador In-App requer bots muito mais sofisticados.
+
+Ambiente Mobile
+Excelente. Foi desenhada especificamente para o comportamento mobile e o ecossistema de Apps da Meta.
