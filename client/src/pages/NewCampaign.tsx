@@ -36,7 +36,7 @@ const campaignFormSchema = z.object({
   safePageUrl: z.string().url("URL da Safe Page inválida"),
   blockBots: z.boolean().default(true),
   blockDesktop: z.boolean().default(false),
-  domainId: z.string().optional(),
+  domainId: z.string().min(1, "Selecione um domínio de entrada"),
 });
 
 type CampaignFormValues = z.infer<typeof campaignFormSchema>;
@@ -73,7 +73,7 @@ export default function NewCampaign() {
       safePageUrl: "",
       blockBots: true,
       blockDesktop: false,
-      domainId: undefined,
+      domainId: "",
     },
   });
 
@@ -261,21 +261,28 @@ export default function NewCampaign() {
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <Globe className="w-4 h-4 text-zinc-400" strokeWidth={1.5} />
-                        Domínio Personalizado
+                        Domínio de Entrada
                       </FormLabel>
-                      <Select onValueChange={(val) => field.onChange(val === "default" ? undefined : val)} value={field.value || "default"}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger data-testid="select-domain">
-                            <SelectValue placeholder="Usar domínio padrão do LinkShield" />
+                            <SelectValue placeholder="Selecione um domínio verificado" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="default">Usar domínio padrão</SelectItem>
-                          {domains.filter(d => d.dnsVerified).map((domain) => (
-                            <SelectItem key={domain.id} value={domain.id}>
-                              {domain.entryDomain}
-                            </SelectItem>
-                          ))}
+                          {domains.filter(d => d.dnsVerified).length > 0 ? (
+                            domains.filter(d => d.dnsVerified).map((domain) => (
+                              <SelectItem key={domain.id} value={domain.id}>
+                                {domain.entryDomain}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-3 text-xs text-zinc-500 text-center">
+                              Nenhum domínio verificado disponível.
+                              <br />
+                              Cadastre um domínio na página de Domínios.
+                            </div>
+                          )}
                           {domains.filter(d => !d.dnsVerified).length > 0 && (
                             <div className="px-2 py-1.5 text-xs text-zinc-500 border-t border-zinc-700 mt-1">
                               Domínios não verificados não podem ser usados
@@ -284,7 +291,7 @@ export default function NewCampaign() {
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Vincule a um domínio personalizado ou use o domínio padrão
+                        Selecione o domínio que será usado nos anúncios
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
