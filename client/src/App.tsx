@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import NewCampaign from "@/pages/NewCampaign";
 import CampaignAnalytics from "@/pages/CampaignAnalytics";
@@ -25,18 +26,21 @@ function Router() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Landing />;
-  }
-
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/campaigns/new" component={NewCampaign} />
-      <Route path="/campaigns/:id" component={CampaignAnalytics} />
-      <Route path="/analytics" component={Analytics} />
-      <Route component={NotFound} />
+      <Route path="/login" component={Login} />
+      {!isAuthenticated ? (
+        <Route component={Landing} />
+      ) : (
+        <>
+          <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/campaigns/new" component={NewCampaign} />
+          <Route path="/campaigns/:id" component={CampaignAnalytics} />
+          <Route path="/analytics" component={Analytics} />
+          <Route component={NotFound} />
+        </>
+      )}
     </Switch>
   );
 }

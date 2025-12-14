@@ -29,7 +29,7 @@ export default function Landing() {
             <Shield className="w-6 h-6 text-white" strokeWidth={1.5} />
             <span className="font-bold text-lg tracking-tighter text-white">LinkShield</span>
           </div>
-          <a href="/api/login">
+          <a href="/login">
             <Button data-testid="button-login">
               Entrar
               <ArrowRight className="w-4 h-4 ml-2" strokeWidth={1.5} />
@@ -57,7 +57,7 @@ export default function Landing() {
             protegendo suas landing pages de concorrentes e scrapers.
           </p>
 
-          <a href="/api/login">
+          <a href="/login">
             <Button size="lg" className="text-base px-8" data-testid="button-get-started">
               Começar Agora
               <ArrowRight className="w-5 h-5 ml-2" strokeWidth={1.5} />

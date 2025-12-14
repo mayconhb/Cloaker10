@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { isAuthenticated, setupAuth } from "./replitAuth";
+import { isAuthenticated, setupAuth } from "./simpleAuth";
 import { detectBot, getClientIP } from "./botDetector";
 import { detectDevice, shouldBlockDevice } from "./deviceDetector";
 import { insertCampaignSchema } from "@shared/schema";
@@ -14,11 +14,11 @@ export async function registerRoutes(
 
   app.get("/api/auth/user", async (req, res) => {
     try {
-      const user = req.user as any;
-      if (!req.isAuthenticated() || !user?.claims?.sub) {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
         return res.json(null);
       }
-      const dbUser = await storage.getUser(user.claims.sub);
+      const dbUser = await storage.getUser(userId);
       res.json(dbUser);
     } catch (error) {
       console.error("Error fetching user:", error);
