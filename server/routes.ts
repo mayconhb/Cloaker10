@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { isAuthenticated, setupAuth } from "./simpleAuth";
 import { detectBot, getClientIP } from "./botDetector";
 import { detectDevice, shouldBlockDevice } from "./deviceDetector";
+import { detectCountryFromIP, shouldBlockByCountry, AVAILABLE_COUNTRIES } from "./geoDetector";
 import { insertCampaignSchema, insertDomainSchema } from "@shared/schema";
 import { verifyDomainDns, getDnsInstructions } from "./dnsVerifier";
 
@@ -170,6 +171,10 @@ export async function registerRoutes(
       console.error("Error fetching logs:", error);
       res.status(500).json({ message: "Failed to fetch logs" });
     }
+  });
+
+  app.get("/api/countries", (req, res) => {
+    res.json(AVAILABLE_COUNTRIES);
   });
 
   app.get("/api/stats", isAuthenticated, async (req, res) => {
@@ -365,13 +370,19 @@ export async function registerRoutes(
       const deviceBlock = shouldBlockDevice(deviceDetection, campaign.blockDesktop ?? false);
       const shouldBlockByDevice = deviceBlock.shouldBlock;
 
-      const shouldBlock = shouldBlockBot || shouldBlockByDevice;
+      const geoResult = await detectCountryFromIP(ipAddress);
+      const geoBlock = shouldBlockByCountry(geoResult.country, campaign.blockedCountries);
+      const shouldBlockByGeo = geoBlock.shouldBlock;
+
+      const shouldBlock = shouldBlockBot || shouldBlockByDevice || shouldBlockByGeo;
       let blockReason: string | null = null;
       
       if (shouldBlockBot) {
         blockReason = `Camada 1 (Bot): ${botDetection.reason}`;
       } else if (shouldBlockByDevice) {
         blockReason = `Camada 2 (Dispositivo): ${deviceBlock.reason}`;
+      } else if (shouldBlockByGeo) {
+        blockReason = `Camada 3 (Geo): ${geoBlock.reason}`;
       }
 
       await storage.createAccessLog({
@@ -379,6 +390,7 @@ export async function registerRoutes(
         userAgent,
         ipAddress,
         referer,
+        country: geoResult.country,
         deviceType: deviceDetection.deviceType,
         isBot: botDetection.isBot,
         botReason: botDetection.reason,

@@ -4,14 +4,23 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Shield, Bot, Loader2, Monitor, Globe, Plus } from "lucide-react";
+import { ArrowLeft, Shield, Bot, Loader2, Monitor, Globe, Plus, MapPin, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Domain } from "@shared/schema";
+
+interface Country {
+  code: string;
+  name: string;
+}
 import {
   Form,
   FormControl,
@@ -36,6 +45,7 @@ const campaignFormSchema = z.object({
   safePageUrl: z.string().url("URL da Safe Page inválida"),
   blockBots: z.boolean().default(true),
   blockDesktop: z.boolean().default(false),
+  blockedCountries: z.array(z.string()).default([]),
   domainId: z.string().min(1, "Selecione um domínio de entrada"),
 });
 
@@ -59,9 +69,14 @@ export default function NewCampaign() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  // Query para carregar domínios do usuário
+  const [countrySearchOpen, setCountrySearchOpen] = useState(false);
+
   const { data: domains = [] } = useQuery<Domain[]>({
     queryKey: ["/api/domains"],
+  });
+
+  const { data: availableCountries = [] } = useQuery<Country[]>({
+    queryKey: ["/api/countries"],
   });
 
   const form = useForm<CampaignFormValues>({
@@ -73,6 +88,7 @@ export default function NewCampaign() {
       safePageUrl: "",
       blockBots: true,
       blockDesktop: false,
+      blockedCountries: [],
       domainId: "",
     },
   });
@@ -363,16 +379,88 @@ export default function NewCampaign() {
                   )}
                 />
 
-                <div className="flex items-center justify-between gap-4 rounded-lg border border-zinc-800/50 p-4 opacity-50">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-zinc-500 font-medium text-sm">Camada 3: Geolocalização</span>
-                      <span className="text-xs text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded">Em breve</span>
-                    </div>
-                    <p className="text-xs text-zinc-600">Bloqueia países específicos</p>
-                  </div>
-                  <Switch disabled />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="blockedCountries"
+                  render={({ field }) => (
+                    <FormItem className="rounded-lg border border-zinc-800 p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-zinc-400" strokeWidth={1.5} />
+                            <FormLabel className="text-white font-medium cursor-pointer">
+                              Camada 3: Geolocalização
+                            </FormLabel>
+                          </div>
+                          <FormDescription className="text-xs">
+                            Bloqueia acessos de países específicos. Selecione os países que deseja bloquear.
+                          </FormDescription>
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start text-zinc-400"
+                              data-testid="button-select-countries"
+                            >
+                              <Plus className="w-3 h-3 mr-2" strokeWidth={1.5} />
+                              Adicionar país bloqueado
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar país..." />
+                              <CommandList>
+                                <CommandEmpty>Nenhum país encontrado.</CommandEmpty>
+                                <CommandGroup>
+                                  {availableCountries
+                                    .filter(country => !field.value.includes(country.code))
+                                    .map((country) => (
+                                      <CommandItem
+                                        key={country.code}
+                                        value={country.name}
+                                        onSelect={() => {
+                                          field.onChange([...field.value, country.code]);
+                                          setCountrySearchOpen(false);
+                                        }}
+                                        data-testid={`item-country-${country.code}`}
+                                      >
+                                        {country.name} ({country.code})
+                                      </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        {field.value.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {field.value.map((code) => {
+                              const country = availableCountries.find(c => c.code === code);
+                              return (
+                                <Badge
+                                  key={code}
+                                  variant="secondary"
+                                  className="flex items-center gap-1 cursor-pointer"
+                                  onClick={() => {
+                                    field.onChange(field.value.filter(c => c !== code));
+                                  }}
+                                  data-testid={`badge-country-${code}`}
+                                >
+                                  {country?.name || code}
+                                  <X className="w-3 h-3" strokeWidth={1.5} />
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </FormItem>
+                  )}
+                />
 
                 <div className="flex items-center justify-between gap-4 rounded-lg border border-zinc-800/50 p-4 opacity-50">
                   <div className="space-y-1">
