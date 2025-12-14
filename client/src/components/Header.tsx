@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, LayoutDashboard, BarChart3, LogOut } from "lucide-react";
+import { Shield, LayoutDashboard, BarChart3, LogOut, Globe } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ export function Header() {
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/domains", label: "Domínios", icon: Globe },
     { href: "/analytics", label: "Analytics", icon: BarChart3 },
   ];
 

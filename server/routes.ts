@@ -4,7 +4,8 @@ import { storage } from "./storage";
 import { isAuthenticated, setupAuth } from "./simpleAuth";
 import { detectBot, getClientIP } from "./botDetector";
 import { detectDevice, shouldBlockDevice } from "./deviceDetector";
-import { insertCampaignSchema } from "@shared/schema";
+import { insertCampaignSchema, insertDomainSchema } from "@shared/schema";
+import { verifyDomainDns, getDnsInstructions } from "./dnsVerifier";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -48,9 +49,25 @@ export async function registerRoutes(
   app.post("/api/campaigns", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
+      const userId = user.claims.sub;
+      
+      // Validar domainId se fornecido
+      if (req.body.domainId) {
+        const domain = await storage.getDomain(req.body.domainId);
+        if (!domain) {
+          return res.status(400).json({ message: "Domínio não encontrado" });
+        }
+        if (domain.userId !== userId) {
+          return res.status(403).json({ message: "Você não tem permissão para usar este domínio" });
+        }
+        if (!domain.dnsVerified) {
+          return res.status(400).json({ message: "O domínio precisa ter o DNS verificado antes de ser usado" });
+        }
+      }
+
       const parsed = insertCampaignSchema.safeParse({
         ...req.body,
-        userId: user.claims.sub,
+        userId: userId,
       });
 
       if (!parsed.success) {
@@ -170,9 +187,159 @@ export async function registerRoutes(
     }
   });
 
+  // Domain routes
+  app.get("/api/domains", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const domains = await storage.getDomains(user.claims.sub);
+      res.json(domains);
+    } catch (error) {
+      console.error("Error fetching domains:", error);
+      res.status(500).json({ message: "Failed to fetch domains" });
+    }
+  });
+
+  app.post("/api/domains", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const parsed = insertDomainSchema.safeParse({
+        ...req.body,
+        userId: user.claims.sub,
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid domain data", errors: parsed.error.errors });
+      }
+
+      const existingDomain = await storage.getDomainByEntryDomain(parsed.data.entryDomain);
+      if (existingDomain) {
+        return res.status(400).json({ message: "This domain is already registered" });
+      }
+
+      const domain = await storage.createDomain(parsed.data);
+      res.status(201).json(domain);
+    } catch (error) {
+      console.error("Error creating domain:", error);
+      res.status(500).json({ message: "Failed to create domain" });
+    }
+  });
+
+  app.get("/api/domains/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const domain = await storage.getDomain(req.params.id);
+
+      if (!domain) {
+        return res.status(404).json({ message: "Domain not found" });
+      }
+
+      if (domain.userId !== user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const instructions = getDnsInstructions(domain.entryDomain, domain.verificationToken || "");
+      res.json({ ...domain, dnsInstructions: instructions });
+    } catch (error) {
+      console.error("Error fetching domain:", error);
+      res.status(500).json({ message: "Failed to fetch domain" });
+    }
+  });
+
+  app.post("/api/domains/:id/verify", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const domain = await storage.getDomain(req.params.id);
+
+      if (!domain) {
+        return res.status(404).json({ message: "Domain not found" });
+      }
+
+      if (domain.userId !== user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const result = await verifyDomainDns(domain.entryDomain, domain.verificationToken || undefined);
+      
+      if (result.verified) {
+        await storage.updateDomain(domain.id, {
+          dnsVerified: true,
+          lastVerifiedAt: new Date(),
+        });
+      }
+
+      res.json({
+        verified: result.verified,
+        method: result.method,
+        reason: result.reason,
+        targetFound: result.targetFound,
+      });
+    } catch (error) {
+      console.error("Error verifying domain:", error);
+      res.status(500).json({ message: "Failed to verify domain" });
+    }
+  });
+
+  app.patch("/api/domains/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const domain = await storage.getDomain(req.params.id);
+
+      if (!domain) {
+        return res.status(404).json({ message: "Domain not found" });
+      }
+
+      if (domain.userId !== user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updated = await storage.updateDomain(req.params.id, {
+        offerDomain: req.body.offerDomain,
+      });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating domain:", error);
+      res.status(500).json({ message: "Failed to update domain" });
+    }
+  });
+
+  app.delete("/api/domains/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const domain = await storage.getDomain(req.params.id);
+
+      if (!domain) {
+        return res.status(404).json({ message: "Domain not found" });
+      }
+
+      if (domain.userId !== user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteDomain(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting domain:", error);
+      res.status(500).json({ message: "Failed to delete domain" });
+    }
+  });
+
   app.get("/go/:slug", async (req, res) => {
     try {
-      const campaign = await storage.getCampaignBySlug(req.params.slug);
+      const hostHeader = req.headers.host || "";
+      const entryDomain = hostHeader.split(":")[0].toLowerCase();
+      
+      // Primeiro tenta buscar campanha vinculada a este domínio específico
+      let campaign = await storage.getCampaignBySlugAndDomain(req.params.slug, entryDomain);
+      
+      // Se não encontrou por domínio específico, busca campanha sem domínio vinculado
+      if (!campaign) {
+        const globalCampaign = await storage.getCampaignBySlug(req.params.slug);
+        // Só usa o fallback se a campanha NÃO tiver domínio vinculado
+        // Isso evita que campanhas com domínio específico sejam acessadas de outros domínios
+        if (globalCampaign && !globalCampaign.domainId) {
+          campaign = globalCampaign;
+        }
+      }
 
       if (!campaign || !campaign.isActive) {
         return res.status(404).send("Not Found");
@@ -182,16 +349,13 @@ export async function registerRoutes(
       const ipAddress = getClientIP(req);
       const referer = req.headers["referer"] || null;
 
-      // Camada 1: Detecção de Bots
       const botDetection = detectBot(userAgent);
       const shouldBlockBot = campaign.blockBots && botDetection.isBot;
 
-      // Camada 2: Detecção de Dispositivo
       const deviceDetection = detectDevice(userAgent);
       const deviceBlock = shouldBlockDevice(deviceDetection, campaign.blockDesktop ?? false);
       const shouldBlockByDevice = deviceBlock.shouldBlock;
 
-      // Determinar se deve bloquear e o motivo
       const shouldBlock = shouldBlockBot || shouldBlockByDevice;
       let blockReason: string | null = null;
       

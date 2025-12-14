@@ -11,6 +11,7 @@ import Dashboard from "@/pages/Dashboard";
 import NewCampaign from "@/pages/NewCampaign";
 import CampaignAnalytics from "@/pages/CampaignAnalytics";
 import Analytics from "@/pages/Analytics";
+import Domains from "@/pages/Domains";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -38,6 +39,7 @@ function Router() {
           <Route path="/campaigns/new" component={NewCampaign} />
           <Route path="/campaigns/:id" component={CampaignAnalytics} />
           <Route path="/analytics" component={Analytics} />
+          <Route path="/domains" component={Domains} />
           <Route component={NotFound} />
         </>
       )}

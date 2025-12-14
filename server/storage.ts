@@ -1,13 +1,21 @@
 import { db } from "./db";
-import { users, campaigns, accessLogs, type User, type UpsertUser, type Campaign, type InsertCampaign, type AccessLog, type InsertAccessLog } from "@shared/schema";
+import { users, campaigns, accessLogs, domains, type User, type UpsertUser, type Campaign, type InsertCampaign, type AccessLog, type InsertAccessLog, type Domain, type InsertDomain } from "@shared/schema";
 import { eq, desc, and, sql, count, inArray } from "drizzle-orm";
+import crypto from "crypto";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  getDomains(userId: string): Promise<Domain[]>;
+  getDomain(id: string): Promise<Domain | undefined>;
+  getDomainByEntryDomain(entryDomain: string): Promise<Domain | undefined>;
+  createDomain(domain: InsertDomain): Promise<Domain>;
+  updateDomain(id: string, data: Partial<Domain>): Promise<Domain | undefined>;
+  deleteDomain(id: string): Promise<void>;
   getCampaigns(userId: string): Promise<Campaign[]>;
   getCampaign(id: string): Promise<Campaign | undefined>;
   getCampaignBySlug(slug: string): Promise<Campaign | undefined>;
+  getCampaignBySlugAndDomain(slug: string, entryDomain: string): Promise<Campaign | undefined>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaign(id: string, data: Partial<InsertCampaign>): Promise<Campaign | undefined>;
   deleteCampaign(id: string): Promise<void>;
@@ -44,6 +52,53 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getDomains(userId: string): Promise<Domain[]> {
+    return await db
+      .select()
+      .from(domains)
+      .where(eq(domains.userId, userId))
+      .orderBy(desc(domains.createdAt));
+  }
+
+  async getDomain(id: string): Promise<Domain | undefined> {
+    const [domain] = await db.select().from(domains).where(eq(domains.id, id)).limit(1);
+    return domain;
+  }
+
+  async getDomainByEntryDomain(entryDomain: string): Promise<Domain | undefined> {
+    const normalizedDomain = entryDomain.toLowerCase().replace(/^www\./, '');
+    const [domain] = await db.select().from(domains).where(eq(domains.entryDomain, normalizedDomain)).limit(1);
+    return domain;
+  }
+
+  async createDomain(domainData: InsertDomain): Promise<Domain> {
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const normalizedEntryDomain = domainData.entryDomain.toLowerCase().replace(/^www\./, '');
+    const [domain] = await db
+      .insert(domains)
+      .values({
+        ...domainData,
+        entryDomain: normalizedEntryDomain,
+        verificationToken,
+      })
+      .returning();
+    return domain;
+  }
+
+  async updateDomain(id: string, data: Partial<Domain>): Promise<Domain | undefined> {
+    const [domain] = await db
+      .update(domains)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(domains.id, id))
+      .returning();
+    return domain;
+  }
+
+  async deleteDomain(id: string): Promise<void> {
+    await db.update(campaigns).set({ domainId: null }).where(eq(campaigns.domainId, id));
+    await db.delete(domains).where(eq(domains.id, id));
+  }
+
   async getCampaigns(userId: string): Promise<Campaign[]> {
     return await db
       .select()
@@ -59,6 +114,19 @@ export class DatabaseStorage implements IStorage {
 
   async getCampaignBySlug(slug: string): Promise<Campaign | undefined> {
     const [campaign] = await db.select().from(campaigns).where(eq(campaigns.slug, slug)).limit(1);
+    return campaign;
+  }
+
+  async getCampaignBySlugAndDomain(slug: string, entryDomain: string): Promise<Campaign | undefined> {
+    const domain = await this.getDomainByEntryDomain(entryDomain);
+    if (!domain) {
+      return undefined;
+    }
+    const [campaign] = await db
+      .select()
+      .from(campaigns)
+      .where(and(eq(campaigns.slug, slug), eq(campaigns.domainId, domain.id)))
+      .limit(1);
     return campaign;
   }
 

@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
+import { useLocation, Link } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Shield, Bot, Loader2, Monitor } from "lucide-react";
+import { ArrowLeft, Shield, Bot, Loader2, Monitor, Globe, Plus } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Domain } from "@shared/schema";
 import {
   Form,
   FormControl,
@@ -34,6 +36,7 @@ const campaignFormSchema = z.object({
   safePageUrl: z.string().url("URL da Safe Page inválida"),
   blockBots: z.boolean().default(true),
   blockDesktop: z.boolean().default(false),
+  domainId: z.string().optional(),
 });
 
 type CampaignFormValues = z.infer<typeof campaignFormSchema>;
@@ -56,6 +59,11 @@ export default function NewCampaign() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
+  // Query para carregar domínios do usuário
+  const { data: domains = [] } = useQuery<Domain[]>({
+    queryKey: ["/api/domains"],
+  });
+
   const form = useForm<CampaignFormValues>({
     resolver: zodResolver(campaignFormSchema),
     defaultValues: {
@@ -65,6 +73,7 @@ export default function NewCampaign() {
       safePageUrl: "",
       blockBots: true,
       blockDesktop: false,
+      domainId: undefined,
     },
   });
 
@@ -103,7 +112,12 @@ export default function NewCampaign() {
   });
 
   const onSubmit = (data: CampaignFormValues) => {
-    createCampaignMutation.mutate(data);
+    // Remove domainId se estiver vazio (usar domínio padrão)
+    const payload = {
+      ...data,
+      domainId: data.domainId || undefined,
+    };
+    createCampaignMutation.mutate(payload);
   };
 
   const generateSlug = () => {
@@ -235,6 +249,43 @@ export default function NewCampaign() {
                         />
                       </FormControl>
                       <FormDescription>Página exibida para bots e visitantes bloqueados</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="domainId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-zinc-400" strokeWidth={1.5} />
+                        Domínio Personalizado
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-domain">
+                            <SelectValue placeholder="Usar domínio padrão do LinkShield" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">Usar domínio padrão</SelectItem>
+                          {domains.filter(d => d.dnsVerified).map((domain) => (
+                            <SelectItem key={domain.id} value={domain.id}>
+                              {domain.entryDomain}
+                            </SelectItem>
+                          ))}
+                          {domains.filter(d => !d.dnsVerified).length > 0 && (
+                            <div className="px-2 py-1.5 text-xs text-zinc-500 border-t border-zinc-700 mt-1">
+                              Domínios não verificados não podem ser usados
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Vincule a um domínio personalizado ou use o domínio padrão
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
