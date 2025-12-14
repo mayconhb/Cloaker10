@@ -69,7 +69,7 @@ export default function CampaignAnalytics() {
 
   const copyLink = async () => {
     if (campaign) {
-      const url = `${window.location.origin}/go/${campaign.slug}`;
+      const url = `${window.location.origin}/${campaign.slug}`;
       await navigator.clipboard.writeText(url);
       toast({
         title: "Link copiado!",
@@ -145,7 +145,7 @@ export default function CampaignAnalytics() {
                   {campaign.isActive ? "Ativo" : "Inativo"}
                 </Badge>
               </div>
-              <p className="text-sm text-zinc-400 mt-1 font-mono">/go/{campaign.slug}</p>
+              <p className="text-sm text-zinc-400 mt-1 font-mono">/{campaign.slug}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

@@ -323,17 +323,25 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/go/:slug", async (req, res) => {
+  app.get("/:slug", async (req, res, next) => {
     try {
+      const slug = req.params.slug;
+      
+      // Ignora rotas conhecidas do frontend/sistema
+      const reservedPaths = ['dashboard', 'campaigns', 'analytics', 'domains', 'api', 'assets', 'src', '@', 'node_modules'];
+      if (reservedPaths.some(path => slug.startsWith(path)) || slug.includes('.')) {
+        return next();
+      }
+      
       const hostHeader = req.headers.host || "";
       const entryDomain = hostHeader.split(":")[0].toLowerCase();
       
       // Primeiro tenta buscar campanha vinculada a este domínio específico
-      let campaign = await storage.getCampaignBySlugAndDomain(req.params.slug, entryDomain);
+      let campaign = await storage.getCampaignBySlugAndDomain(slug, entryDomain);
       
       // Se não encontrou por domínio específico, busca campanha sem domínio vinculado
       if (!campaign) {
-        const globalCampaign = await storage.getCampaignBySlug(req.params.slug);
+        const globalCampaign = await storage.getCampaignBySlug(slug);
         // Só usa o fallback se a campanha NÃO tiver domínio vinculado
         // Isso evita que campanhas com domínio específico sejam acessadas de outros domínios
         if (globalCampaign && !globalCampaign.domainId) {
@@ -341,8 +349,9 @@ export async function registerRoutes(
         }
       }
 
+      // Se não encontrou campanha, deixa o Vite/frontend tratar
       if (!campaign || !campaign.isActive) {
-        return res.status(404).send("Not Found");
+        return next();
       }
 
       const userAgent = req.headers["user-agent"] || "";

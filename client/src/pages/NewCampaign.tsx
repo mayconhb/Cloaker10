@@ -201,7 +201,7 @@ export default function NewCampaign() {
                       <FormLabel>Slug (URL)</FormLabel>
                       <FormControl>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-zinc-400 font-mono">/go/</span>
+                          <span className="text-sm text-zinc-400 font-mono">/</span>
                           <Input 
                             placeholder="oferta-black-friday" 
                             {...field} 

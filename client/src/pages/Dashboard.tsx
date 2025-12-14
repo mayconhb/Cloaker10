@@ -53,7 +53,7 @@ export default function Dashboard() {
   });
 
   const copyLink = async (slug: string) => {
-    const url = `${window.location.origin}/go/${slug}`;
+    const url = `${window.location.origin}/${slug}`;
     await navigator.clipboard.writeText(url);
     toast({
       title: "Link copiado!",
@@ -167,7 +167,7 @@ export default function Dashboard() {
                       <TableCell className="font-medium text-white">{campaign.name}</TableCell>
                       <TableCell>
                         <code className="text-xs text-zinc-400 font-mono bg-zinc-800/50 px-2 py-1 rounded">
-                          /go/{campaign.slug}
+                          /{campaign.slug}
                         </code>
                       </TableCell>
                       <TableCell>
