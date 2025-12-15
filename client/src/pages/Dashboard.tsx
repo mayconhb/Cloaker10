@@ -60,9 +60,9 @@ export default function Dashboard() {
 
   const getCampaignUrl = (campaign: CampaignWithDomain) => {
     if (campaign.domain?.entryDomain && campaign.domain?.dnsVerified) {
-      return `https://${campaign.domain.entryDomain}/${campaign.slug}`;
+      return `https://${campaign.domain.entryDomain}/r/${campaign.slug}`;
     }
-    return `${window.location.origin}/${campaign.slug}`;
+    return `${window.location.origin}/r/${campaign.slug}`;
   };
 
   const copyLink = async (campaign: CampaignWithDomain) => {
@@ -231,7 +231,7 @@ export default function Dashboard() {
                           <TableCell className="font-medium text-white">{campaign.name}</TableCell>
                           <TableCell>
                             <code className="text-xs text-zinc-400 font-mono bg-zinc-800/60 px-2.5 py-1 rounded-md border border-zinc-700/30">
-                              /{campaign.slug}
+                              /r/{campaign.slug}
                             </code>
                           </TableCell>
                           <TableCell>
