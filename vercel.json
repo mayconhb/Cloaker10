@@ -11,6 +11,8 @@
     { "source": "/api/campaigns/:id/logs", "destination": "/api/campaigns/[id]/logs" },
     { "source": "/api/campaigns/:id", "destination": "/api/campaigns/[id]" },
     { "source": "/api/campaigns", "destination": "/api/campaigns" },
+    { "source": "/api/domains/:id/verify", "destination": "/api/domains/[id]/verify" },
+    { "source": "/api/domains/:id", "destination": "/api/domains/[id]" },
     { "source": "/api/domains", "destination": "/api/domains" },
     { "source": "/api/stats", "destination": "/api/stats" },
     { "source": "/api/countries", "destination": "/api/countries" },
