@@ -53,8 +53,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     return res.status(401).json({ message: 'Credenciais inválidas' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return res.status(500).json({ message: 'Erro interno do servidor' });
+    const errorMessage = error?.message || 'Erro desconhecido';
+    const errorCode = error?.code || 'UNKNOWN';
+    return res.status(500).json({ 
+      message: 'Erro interno do servidor',
+      debug: process.env.NODE_ENV !== 'production' ? { errorMessage, errorCode } : undefined
+    });
   }
 }
