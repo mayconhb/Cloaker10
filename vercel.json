@@ -1,0 +1,30 @@
+{
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/auth/login", "destination": "/api/auth/login" },
+    { "source": "/api/auth/register", "destination": "/api/auth/register" },
+    { "source": "/api/auth/user", "destination": "/api/auth/user" },
+    { "source": "/api/auth/logout", "destination": "/api/auth/logout" },
+    { "source": "/api/campaigns/:id/logs", "destination": "/api/campaigns/[id]/logs" },
+    { "source": "/api/campaigns/:id", "destination": "/api/campaigns/[id]" },
+    { "source": "/api/campaigns", "destination": "/api/campaigns" },
+    { "source": "/api/domains", "destination": "/api/domains" },
+    { "source": "/api/stats", "destination": "/api/stats" },
+    { "source": "/api/countries", "destination": "/api/countries" },
+    { "source": "/r/:slug", "destination": "/api/r/[slug]" },
+    { "source": "/((?!api|_next|static|favicon.ico|assets).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
+      ]
+    }
+  ]
+}
