@@ -16,8 +16,13 @@
     { "source": "/api/domains", "destination": "/api/domains" },
     { "source": "/api/stats", "destination": "/api/stats" },
     { "source": "/api/countries", "destination": "/api/countries" },
-    { "source": "/r/:slug", "destination": "/api/r/[slug]" },
-    { "source": "/((?!api|_next|static|favicon.ico|assets).*)", "destination": "/index.html" }
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/analytics", "destination": "/index.html" },
+    { "source": "/domains", "destination": "/index.html" },
+    { "source": "/campaigns/:path*", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/register", "destination": "/index.html" },
+    { "source": "/:slug", "destination": "/api/r/[slug]" }
   ],
   "headers": [
     {

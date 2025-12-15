@@ -77,9 +77,9 @@ export default function CampaignAnalytics() {
   const getCampaignUrl = () => {
     if (!campaign) return "";
     if (campaign.domain?.entryDomain && campaign.domain?.dnsVerified) {
-      return `https://${campaign.domain.entryDomain}/r/${campaign.slug}`;
+      return `https://${campaign.domain.entryDomain}/${campaign.slug}`;
     }
-    return `${window.location.origin}/r/${campaign.slug}`;
+    return `${window.location.origin}/${campaign.slug}`;
   };
 
   const copyLink = async () => {
@@ -160,7 +160,7 @@ export default function CampaignAnalytics() {
                   {campaign.isActive ? "Ativo" : "Inativo"}
                 </Badge>
               </div>
-              <p className="text-sm text-zinc-400 mt-1 font-mono">/r/{campaign.slug}</p>
+              <p className="text-sm text-zinc-400 mt-1 font-mono">/{campaign.slug}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
