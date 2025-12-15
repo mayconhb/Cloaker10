@@ -107,7 +107,4 @@
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
   }
-  "scripts": {
-  "build:vercel": "vite build"
-}
 }
