@@ -17,7 +17,7 @@
     { "source": "/api/stats", "destination": "/api/stats" },
     { "source": "/api/countries", "destination": "/api/countries" },
     { "source": "/r/:slug", "destination": "/api/r/[slug]" },
-    { "source": "/((?!api|_next|static|favicon.ico|assets).*)", "destination": "/index.html" }
+    { "source": "/((?!api|_next|static|favicon.ico|assets|r/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
