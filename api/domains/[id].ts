@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { storage } from '../_lib/storage.js';
 import { authenticateRequest } from '../_lib/auth.js';
-import { getDnsInstructions } from '../_lib/dnsVerifier.js';
+import { verifyDomainDns, getDnsInstructions } from '../_lib/dnsVerifier.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const auth = await authenticateRequest(req);
@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  const { id } = req.query;
+  const { id, action } = req.query;
   
   if (typeof id !== 'string') {
     return res.status(400).json({ message: 'Invalid domain ID' });
@@ -34,6 +34,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ ...domain, dnsInstructions });
     }
 
+    if (req.method === 'POST' && action === 'verify') {
+      const result = await verifyDomainDns(domain.entryDomain, domain.verificationToken || undefined);
+      
+      if (result.verified) {
+        const updated = await storage.updateDomain(id, {
+          dnsVerified: true,
+          lastVerifiedAt: new Date(),
+        });
+        
+        const dnsInstructions = domain.verificationToken 
+          ? getDnsInstructions(domain.entryDomain, domain.verificationToken)
+          : null;
+        
+        return res.status(200).json({
+          ...updated,
+          dnsInstructions,
+          verificationResult: result,
+        });
+      }
+
+      const dnsInstructions = domain.verificationToken 
+        ? getDnsInstructions(domain.entryDomain, domain.verificationToken)
+        : null;
+
+      return res.status(200).json({
+        ...domain,
+        dnsInstructions,
+        verificationResult: result,
+      });
+    }
+
     if (req.method === 'PUT' || req.method === 'PATCH') {
       const { offerDomain } = req.body;
       const updated = await storage.updateDomain(id, { offerDomain });
@@ -48,6 +79,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ message: 'Method not allowed' });
   } catch (error) {
     console.error('Domain error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Internal server error', error: String(error) });
   }
 }

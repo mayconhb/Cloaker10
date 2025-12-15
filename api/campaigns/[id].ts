@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  const { id } = req.query;
+  const { id, logs } = req.query;
   if (typeof id !== 'string') {
     return res.status(400).json({ message: 'Invalid campaign ID' });
   }
@@ -23,6 +23,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'GET') {
+      if (logs === 'true') {
+        const limit = parseInt(req.query.limit as string) || 100;
+        const accessLogs = await storage.getAccessLogs(id, limit);
+        return res.status(200).json(accessLogs);
+      }
+      
       const stats = await storage.getCampaignStats(campaign.id);
       return res.status(200).json({ ...campaign, stats });
     }

@@ -87,7 +87,7 @@ export default function Domains() {
 
   const verifyMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest("POST", `/api/domains/${id}/verify`);
+      const response = await apiRequest("POST", `/api/domains/${id}?action=verify`);
       return response.json();
     },
     onSuccess: (data, id) => {

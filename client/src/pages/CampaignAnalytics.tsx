@@ -52,18 +52,20 @@ export default function CampaignAnalytics() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign>({
+  const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign & { stats?: CampaignStats }>({
     queryKey: ["/api/campaigns", id],
     enabled: isAuthenticated && !!id,
   });
 
-  const { data: stats, isLoading: statsLoading } = useQuery<CampaignStats>({
-    queryKey: ["/api/campaigns", id, "stats"],
-    enabled: isAuthenticated && !!id,
-  });
+  const stats = campaign?.stats;
 
   const { data: logs, isLoading: logsLoading } = useQuery<AccessLog[]>({
     queryKey: ["/api/campaigns", id, "logs"],
+    queryFn: async () => {
+      const res = await fetch(`/api/campaigns/${id}?logs=true`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch logs");
+      return res.json();
+    },
     enabled: isAuthenticated && !!id,
   });
 
@@ -169,7 +171,7 @@ export default function CampaignAnalytics() {
               <Shield className="w-4 h-4 text-zinc-500" strokeWidth={1.5} />
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
+              {campaignLoading ? (
                 <Skeleton className="h-8 w-20 bg-zinc-800" />
               ) : (
                 <p className="text-3xl font-bold text-white" data-testid="stat-total-clicks">
@@ -186,7 +188,7 @@ export default function CampaignAnalytics() {
               <ShieldCheck className="w-4 h-4 text-emerald-500" strokeWidth={1.5} />
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
+              {campaignLoading ? (
                 <Skeleton className="h-8 w-20 bg-zinc-800" />
               ) : (
                 <p className="text-3xl font-bold text-emerald-400" data-testid="stat-allowed">
@@ -203,7 +205,7 @@ export default function CampaignAnalytics() {
               <ShieldX className="w-4 h-4 text-rose-500" strokeWidth={1.5} />
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
+              {campaignLoading ? (
                 <Skeleton className="h-8 w-20 bg-zinc-800" />
               ) : (
                 <p className="text-3xl font-bold text-rose-400" data-testid="stat-blocked">
@@ -221,7 +223,7 @@ export default function CampaignAnalytics() {
               <CardTitle className="text-lg font-semibold text-white">Distribuição</CardTitle>
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
+              {campaignLoading ? (
                 <div className="h-48 flex items-center justify-center">
                   <Skeleton className="w-32 h-32 rounded-full bg-zinc-800" />
                 </div>
