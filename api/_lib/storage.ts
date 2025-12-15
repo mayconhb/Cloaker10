@@ -1,6 +1,6 @@
 import { db } from "./db.js";
-import { users, campaigns, accessLogs, domains } from "../../shared/schema";
-import type { User, UpsertUser, Campaign, InsertCampaign, AccessLog, InsertAccessLog, Domain, InsertDomain } from "../../shared/schema";
+import { users, campaigns, accessLogs, domains } from "./schema.js";
+import type { User, UpsertUser, Campaign, InsertCampaign, AccessLog, InsertAccessLog, Domain, InsertDomain } from "./schema.js";
 import { eq, desc, and, sql, count, inArray } from "drizzle-orm";
 import crypto from "crypto";
 

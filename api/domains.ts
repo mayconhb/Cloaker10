@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { storage } from './_lib/storage.js';
 import { authenticateRequest } from './_lib/auth.js';
-import { insertDomainSchema } from '../shared/schema';
+import { insertDomainSchema } from './_lib/schema.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const auth = await authenticateRequest(req);
