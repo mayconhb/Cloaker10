@@ -66,14 +66,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDomainByEntryDomain(entryDomain: string): Promise<Domain | undefined> {
-    const normalizedDomain = entryDomain.toLowerCase().replace(/^www\./, '');
+    const normalizedDomain = entryDomain
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '');
     const [domain] = await db.select().from(domains).where(eq(domains.entryDomain, normalizedDomain)).limit(1);
     return domain;
   }
 
   async createDomain(domainData: InsertDomain): Promise<Domain> {
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const normalizedEntryDomain = domainData.entryDomain.toLowerCase().replace(/^www\./, '');
+    const normalizedEntryDomain = domainData.entryDomain
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '');
     const [domain] = await db
       .insert(domains)
       .values({
