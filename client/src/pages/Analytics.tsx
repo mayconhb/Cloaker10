@@ -230,7 +230,7 @@ export default function Analytics() {
                       >
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-white truncate">{campaign.name}</p>
-                          <p className="text-xs text-zinc-500 font-mono truncate">/{campaign.slug}</p>
+                          <p className="text-xs text-zinc-500 font-mono truncate">/r/{campaign.slug}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge 

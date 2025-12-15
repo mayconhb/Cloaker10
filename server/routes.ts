@@ -337,15 +337,9 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/:slug", async (req, res, next) => {
+  app.get("/r/:slug", async (req, res, next) => {
     try {
       const slug = req.params.slug;
-      
-      // Ignora rotas conhecidas do frontend/sistema
-      const reservedPaths = ['dashboard', 'campaigns', 'analytics', 'domains', 'api', 'assets', 'src', '@', 'node_modules', 'login', 'register'];
-      if (reservedPaths.some(path => slug.startsWith(path)) || slug.includes('.')) {
-        return next();
-      }
       
       const hostHeader = req.headers.host || "";
       const entryDomain = hostHeader.split(":")[0].toLowerCase();
