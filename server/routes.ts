@@ -37,7 +37,11 @@ export async function registerRoutes(
       const campaignsWithStats = await Promise.all(
         campaigns.map(async (campaign) => {
           const stats = await storage.getCampaignStats(campaign.id);
-          return { ...campaign, stats };
+          let domain = null;
+          if (campaign.domainId) {
+            domain = await storage.getDomain(campaign.domainId);
+          }
+          return { ...campaign, stats, domain };
         })
       );
       
@@ -103,7 +107,11 @@ export async function registerRoutes(
       }
 
       const stats = await storage.getCampaignStats(campaign.id);
-      res.json({ ...campaign, stats });
+      let domain = null;
+      if (campaign.domainId) {
+        domain = await storage.getDomain(campaign.domainId);
+      }
+      res.json({ ...campaign, stats, domain });
     } catch (error) {
       console.error("Error fetching campaign:", error);
       res.status(500).json({ message: "Failed to fetch campaign" });

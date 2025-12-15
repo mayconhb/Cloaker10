@@ -15,7 +15,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const campaignsWithStats = await Promise.all(
         campaigns.map(async (campaign) => {
           const stats = await storage.getCampaignStats(campaign.id);
-          return { ...campaign, stats };
+          let domain = null;
+          if (campaign.domainId) {
+            domain = await storage.getDomain(campaign.domainId);
+          }
+          return { ...campaign, stats, domain };
         })
       );
       return res.status(200).json(campaignsWithStats);

@@ -92,7 +92,7 @@ export default function Domains() {
     },
     onSuccess: (data, id) => {
       queryClient.invalidateQueries({ queryKey: ["/api/domains"] });
-      if (data.verified) {
+      if (data.verificationResult?.verified) {
         toast({
           title: "DNS Verificado",
           description: "Seu domínio está configurado corretamente.",
@@ -100,7 +100,7 @@ export default function Domains() {
       } else {
         toast({
           title: "DNS não verificado",
-          description: data.reason,
+          description: data.verificationResult?.reason || "Falha na verificação do DNS",
           variant: "destructive",
         });
       }

@@ -18,7 +18,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import type { Campaign } from "@shared/schema";
+import type { Campaign, Domain } from "@shared/schema";
+
+interface CampaignWithDomain extends Campaign {
+  domain?: Domain | null;
+  stats?: { totalClicks: number; totalBlocks: number; allowedClicks: number };
+}
 
 interface DashboardStats {
   totalCampaigns: number;
@@ -43,7 +48,7 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data: campaigns, isLoading: campaignsLoading } = useQuery<Campaign[]>({
+  const { data: campaigns, isLoading: campaignsLoading } = useQuery<CampaignWithDomain[]>({
     queryKey: ["/api/campaigns"],
     enabled: isAuthenticated,
   });
@@ -53,8 +58,15 @@ export default function Dashboard() {
     enabled: isAuthenticated,
   });
 
-  const copyLink = async (slug: string) => {
-    const url = `${window.location.origin}/${slug}`;
+  const getCampaignUrl = (campaign: CampaignWithDomain) => {
+    if (campaign.domain?.entryDomain && campaign.domain?.dnsVerified) {
+      return `https://${campaign.domain.entryDomain}/${campaign.slug}`;
+    }
+    return `${window.location.origin}/${campaign.slug}`;
+  };
+
+  const copyLink = async (campaign: CampaignWithDomain) => {
+    const url = getCampaignUrl(campaign);
     await navigator.clipboard.writeText(url);
     toast({
       title: "Link copiado!",
@@ -239,7 +251,7 @@ export default function Dashboard() {
                               <Button 
                                 variant="ghost" 
                                 size="icon"
-                                onClick={() => copyLink(campaign.slug)}
+                                onClick={() => copyLink(campaign)}
                                 data-testid={`button-copy-${campaign.id}`}
                               >
                                 <Copy className="w-4 h-4" strokeWidth={1.5} />

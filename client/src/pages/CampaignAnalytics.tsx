@@ -25,12 +25,17 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import type { Campaign, AccessLog } from "@shared/schema";
+import type { Campaign, AccessLog, Domain } from "@shared/schema";
 
 interface CampaignStats {
   totalClicks: number;
   totalBlocks: number;
   allowedClicks: number;
+}
+
+interface CampaignWithDomain extends Campaign {
+  stats?: CampaignStats;
+  domain?: Domain | null;
 }
 
 export default function CampaignAnalytics() {
@@ -52,7 +57,7 @@ export default function CampaignAnalytics() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data: campaign, isLoading: campaignLoading } = useQuery<Campaign & { stats?: CampaignStats }>({
+  const { data: campaign, isLoading: campaignLoading } = useQuery<CampaignWithDomain>({
     queryKey: ["/api/campaigns", id],
     enabled: isAuthenticated && !!id,
   });
@@ -69,9 +74,17 @@ export default function CampaignAnalytics() {
     enabled: isAuthenticated && !!id,
   });
 
+  const getCampaignUrl = () => {
+    if (!campaign) return "";
+    if (campaign.domain?.entryDomain && campaign.domain?.dnsVerified) {
+      return `https://${campaign.domain.entryDomain}/${campaign.slug}`;
+    }
+    return `${window.location.origin}/${campaign.slug}`;
+  };
+
   const copyLink = async () => {
     if (campaign) {
-      const url = `${window.location.origin}/${campaign.slug}`;
+      const url = getCampaignUrl();
       await navigator.clipboard.writeText(url);
       toast({
         title: "Link copiado!",
