@@ -58,6 +58,10 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
+  /* Premium gradient colors */
+  --emerald-glow: 160 84% 39%;
+  --teal-glow: 168 76% 42%;
+
 /* Fallback for older browsers */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
@@ -207,5 +211,154 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
+  }
+
+  /* Premium glassmorphism utilities */
+  .glass {
+    @apply bg-zinc-900/60 backdrop-blur-xl border border-white/5;
+  }
+
+  .glass-strong {
+    @apply bg-zinc-900/80 backdrop-blur-2xl border border-white/10;
+  }
+
+  .glass-card {
+    @apply bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/50;
+  }
+
+  /* Premium glow effects */
+  .glow-emerald {
+    box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.3);
+  }
+
+  .glow-emerald-sm {
+    box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.2);
+  }
+
+  .glow-emerald-lg {
+    box-shadow: 0 0 60px -10px rgba(16, 185, 129, 0.4);
+  }
+
+  /* Gradient text utility */
+  .text-gradient-emerald {
+    @apply bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-white {
+    @apply bg-gradient-to-r from-slate-200 via-white to-slate-200 bg-clip-text text-transparent;
+  }
+
+  /* Premium background gradients */
+  .bg-gradient-radial-emerald {
+    background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  }
+
+  .bg-gradient-radial-dark {
+    background: radial-gradient(ellipse at center, rgba(24, 24, 27, 0.8) 0%, transparent 70%);
+  }
+
+  /* Animated gradient background orbs */
+  .gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.5;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-20px) scale(1.05);
+    }
+  }
+
+  /* Card gradient backgrounds */
+  .card-gradient-emerald {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 60%);
+  }
+
+  .card-gradient-blue {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+  }
+
+  .card-gradient-rose {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, transparent 60%);
+  }
+
+  /* Premium border glow on hover */
+  .border-glow-emerald {
+    transition: box-shadow 0.3s ease;
+  }
+
+  .border-glow-emerald:hover {
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3), 0 0 20px -5px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Active toggle with emerald accent */
+  .toggle-active-emerald[data-state="checked"] {
+    @apply bg-emerald-600;
+  }
+
+  /* Premium feature card styling */
+  .feature-card {
+    @apply relative bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-6 transition-all duration-300;
+  }
+
+  .feature-card:hover {
+    @apply border-zinc-700/50;
+    transform: translateY(-2px);
+  }
+
+  /* Security toggle premium styling */
+  .security-toggle {
+    @apply relative rounded-lg border border-zinc-800/80 p-4 transition-all duration-300;
+    background: linear-gradient(135deg, rgba(24, 24, 27, 0.5) 0%, rgba(24, 24, 27, 0.8) 100%);
+  }
+
+  .security-toggle:hover {
+    @apply border-zinc-700/80;
+  }
+
+  .security-toggle[data-enabled="true"] {
+    @apply border-emerald-500/30;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(24, 24, 27, 0.8) 100%);
+  }
+
+  /* Subtle pulse animation for status indicators */
+  .pulse-emerald {
+    animation: pulseEmerald 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseEmerald {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+  }
+
+  /* Shimmer effect for loading states */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 }

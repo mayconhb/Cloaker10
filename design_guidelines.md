@@ -16,78 +16,147 @@
   - `rose-500`: "Blocked" / "Error" status
   - `amber-500`: Warnings/Alerts
 
+**Premium Gradients:**
+- Primary Gradient: `from-emerald-400 via-emerald-500 to-teal-600` - Used for accents and highlights
+- Success Gradient: `from-emerald-500 to-emerald-700` - For success states
+- Shield Gradient: `from-slate-200 via-white to-slate-200` - For premium logo/branding
+- Glow Accent: `emerald-500/20` for subtle glows behind important elements
+- Card Gradients: Subtle `from-zinc-900 via-zinc-900 to-zinc-800` for depth
+
 **Typography:** 
 - Font: Inter or Geist Sans (via next/font)
 - Titles: Use tight letter spacing (tracking-tight)
 
 **Icons:** Lucide React with thin strokes (stroke-width 1.5-2)
 
+## Glassmorphism & Visual Effects
+
+**Glassmorphism Implementation:**
+- Background: `bg-zinc-900/60` or `bg-zinc-950/80`
+- Backdrop blur: `backdrop-blur-xl` or `backdrop-blur-2xl`
+- Border: `border border-zinc-800/50` or `border-white/5`
+- For extra premium feel: Add subtle gradient overlays
+
+**Glow Effects:**
+- Use `shadow-emerald-500/10` or `shadow-emerald-500/20` for subtle emerald glow
+- Apply to important CTAs and active elements
+- Use sparingly to maintain sophistication
+
+**Surface Hierarchy:**
+- Level 0 (Background): `bg-zinc-950`
+- Level 1 (Cards): `bg-zinc-900/50` with `border-zinc-800/50`
+- Level 2 (Elevated): `bg-zinc-800/50` with `border-zinc-700/50`
+- Level 3 (Highlighted): Gradient overlays or emerald accents
+
+## Animations & Transitions (framer-motion)
+
+**Entry Animations:**
+- Use `initial={{ opacity: 0, y: 20 }}` and `animate={{ opacity: 1, y: 0 }}`
+- Stagger children with `transition={{ delay: index * 0.1 }}`
+- Duration: 0.5s to 0.8s for smooth entries
+
+**Hover Animations:**
+- Scale: `whileHover={{ scale: 1.02 }}` (subtle, never more than 1.05)
+- Use `transition={{ type: "spring", stiffness: 300 }}`
+
+**Standard Transitions:**
+- All elements: `transition-all duration-300`
+- Buttons/inputs: `transition-all duration-200`
+- Page transitions: 0.4s to 0.6s
+
 ## Global Layout
 
 **Header (Navbar):**
-- Fixed position with glassmorphism effect (backdrop-filter: blur)
-- Logo: Bold "LinkShield" text with tracking-tighter
-- Navigation: Subtle links (Dashboard, Analytics) - white when active, gray when inactive
-- User menu/avatar aligned right
+- Fixed position with enhanced glassmorphism: `bg-zinc-950/70 backdrop-blur-2xl`
+- Border: `border-b border-white/5`
+- Logo: Gradient text or white with emerald accent
+- Navigation: Pills with hover states, active indicator
+- Height: h-16
 
 **Container:** 
 - Centered with `max-w-6xl mx-auto`
 - Generous padding (`p-6` to `p-8`)
 - Nothing should feel cramped
 
-## Dashboard Page (`/admin`)
+## Landing Page
+
+**Hero Section:**
+- Full viewport height with centered content
+- Glassmorphism container for hero text
+- Animated gradient background orbs (emerald/teal)
+- Large, bold headline with gradient accent text
+- Animated status badge
+- Multiple CTAs with different weights
+
+**Features Section:**
+- Cards with hover animations
+- Icon backgrounds with gradient/glow
+- Staggered entry animations
+
+**Trust Indicators:**
+- Security badges with icons
+- Stats/metrics display
+- Subtle animations
+
+**Footer:**
+- Multiple columns with links
+- Social media icons
+- Copyright and legal
+
+## Dashboard Page
 
 **KPI Cards Section:**
-- Three cards side by side displaying: Total Campaigns, Today's Clicks, Today's Blocks
-- Large, semi-transparent icons in card backgrounds for decoration
+- Three cards with subtle gradient backgrounds
+- Large icons (w-8 h-8 or larger) with emerald color
+- Semi-transparent decorative icons
+- Hover lift effect
 
 **Campaigns Table:**
-- Use Shadcn Table component within a Card
-- Header: Light gray text (`text-zinc-400`)
-- Rows: Subtle hover effect (`hover:bg-zinc-800/50`)
-- Status column: Small Badge (green or gray)
-- Slug column: Monospaced font, gray color, with small icon button for "Copy Link"
-- Primary CTA: "New Campaign" button in white (primary accent)
+- Card wrapper with enhanced styling
+- Header row with muted text
+- Zebra striping or hover highlights
+- Status badges with color coding
+- Action buttons grouped
+- Empty state with illustration
 
-## Create Campaign Page (`/admin/new`)
+## Create Campaign Page
 
-Design as a professional setup wizard with logical card sections:
+**Card Sections:**
+- Distinct visual hierarchy between sections
+- Icon + Title in card headers
+- Emerald accent for section icons
 
-**Card 1: Identity**
-- Large inputs for Name and Slug
-- Input for Safe URL
-
-**Card 2: Traffic Engineering (Split Test)**
-- Visual interface for destinations
-- "+ Add Offer" button
-- Each offer row: Small ID input, large URL input, Weight slider/numeric input
-- Trash icon to remove offers
-
-**Card 3: The "Shield" (Security)**
-- Use Switches (Toggles) aligned right, NOT checkboxes
-- Each security feature layout:
-  - [Icon] **Feature Name** [Switch]
-  - Small explanatory text below in `text-sm text-muted-foreground`
-- Features: Block Desktop, Geographic Blocking (with multi-select), Origin Lock
-
-## Analytics Page (`/admin/[id]`)
-
-**Charts (using Recharts):**
-- Clean design: Remove background grids
-- Custom tooltips: Dark background, thin border
-- Line colors: `emerald-500` (Allowed) vs `rose-500` (Blocked)
-- Donut chart: Hollow center with clean side legend
+**Security Toggles:**
+- Enhanced toggle items with:
+  - Icon in decorative container
+  - Clear labels and descriptions
+  - Premium switch styling
+  - Visual feedback on toggle
+- Consider gradient borders for active toggles
 
 ## Micro-Interactions
 
-**Loading States:** Buttons show spinner and disable on click
-**Toasts:** Use Sonner/Shadcn Toast - green border for success, red for errors
-**Transitions:** Apply `transition-all duration-200` to buttons and inputs for smooth hover effects
+**Loading States:** 
+- Buttons show spinner and disable on click
+- Skeleton loaders with pulse animation
+- Smooth fade transitions
+
+**Toasts:** 
+- Use Shadcn Toast with emerald border for success
+- Red/rose border for errors
+- Subtle entry animation
+
+**Transitions:** 
+- Apply `transition-all duration-200` minimum
+- Smooth color and transform changes
 
 ## Visual Quality Standards
 
 - Premium SaaS aesthetic similar to Vercel, Linear, or Supabase
 - Dark mode throughout
 - Minimalist and sophisticated
+- Clean typography hierarchy
+- Consistent spacing (4px grid)
 - NO "Bootstrap default" or "raw HTML" appearance
 - Professional product ready for commercial sale
+- Subtle animations that enhance UX without distraction
