@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from '../_lib/storage';
-import { createToken, setCookieHeader } from '../_lib/auth';
+import { storage } from '../_lib/storage.js';
+import { createToken, setCookieHeader } from '../_lib/auth.js';
 
 // Admin credentials - same as server/simpleAuth.ts
 const ADMIN_USER = {

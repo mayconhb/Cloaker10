@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from '../_lib/storage';
+import { storage } from '../_lib/storage.js';
 import { 
   detectBot, 
   detectDevice, 
@@ -9,7 +9,7 @@ import {
   detectOriginLock,
   shouldBlockByOrigin,
   getClientIP 
-} from '../_lib/detectors';
+} from '../_lib/detectors.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {

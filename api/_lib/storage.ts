@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from "./db.js";
 import { users, campaigns, accessLogs, domains } from "../../shared/schema";
 import type { User, UpsertUser, Campaign, InsertCampaign, AccessLog, InsertAccessLog, Domain, InsertDomain } from "../../shared/schema";
 import { eq, desc, and, sql, count, inArray } from "drizzle-orm";
